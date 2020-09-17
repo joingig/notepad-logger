@@ -9,7 +9,7 @@ But, when i try
 ```
 i get null. Well well, look like there is no short cuts.
 
-Logger find 
+to find notepad.exe:
 - all visible windows ( EnumWindows )
   - get parent process pid ( GetWindowThreadProcessId )
   - get process name ( GetProcessImageFileName )
