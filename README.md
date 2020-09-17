@@ -10,7 +10,7 @@ But, when i try
 i get null. Well well, look like there is no short cuts.
 
 to find notepad.exe:
-- all visible windows ( EnumWindows )
+- find all visible windows ( EnumWindows )
   - get parent process pid ( GetWindowThreadProcessId )
   - get process name ( GetProcessImageFileName )
   - if (strcmp(nameFile,"notepad") got it!
