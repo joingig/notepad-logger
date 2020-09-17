@@ -17,4 +17,4 @@ Logger find
   - use hwnd / pid to send message to notepad (notepad.exe)
 
 
-Dirty logger to windows notepad.
+In [note_logger00.cpp](note_logger00.cpp) i implemented this dirty logger.
