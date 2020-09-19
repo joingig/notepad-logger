@@ -2,68 +2,67 @@ from ctypes import *
 from ctypes.wintypes import *
 from sys import getsizeof
 from os import path
+from datetime import *
 
 #msvcrt = cdll.msvcrt
 #str_mess = "Hello from MSVCRT!\n"
 #msvcrt.printf(str_mess)
 
+#user32.dll  / user32.lib
+EnumWindows = windll.user32.EnumWindows
+GetWindowText = windll.user32.GetWindowTextA
+GetWindowTextLength = windll.user32.GetWindowTextLengthA
+GetWindowThreadProcessId = windll.user32.GetWindowThreadProcessId
+IsWindowVisible = windll.user32.IsWindowVisible
+FindWindowEx = windll.user32.FindWindowExW
+SendMessage = windll.user32.SendMessageW
+MessageBox = windll.user32.MessageBoxW
+#psapi.dll  / psapi.lib
+GetProcessImageFileName = windll.psapi.GetProcessImageFileNameA
+#kernel32.dll / Kernel32.Lib
+OpenProcess = windll.kernel32.OpenProcess
+CloseHandle = windll.kernel32.CloseHandle
+GetLastError = windll.kernel32.GetLastError
 
-#class barley_amount(Union):
-#    _fields_ = [
-#        ("long", c_long),
-#        ("int", c_int),
-#        ("char", c_char * 8)
-#    ]
-#value = input("Enter the amount of barley:")
-#my_barley = barley_amount(15)
-#print(f"barley amount as a long: {my_barley.long}")
-#print(f"barley amount as a int: {my_barley.int}")
-#print(f"barley amount as a char: {my_barley.char}")
-
-#user32.dll  / User32.Lib
-#FindWindowEx(hNotepad, NULL, "EDIT", NULL);
-#SendMessage(edit, EM_REPLACESEL, TRUE, (LPARAM)buf_date);
-#enumWindowCallback(HWND hWnd, LPARAM lparam)
-#GetWindowText(hWnd, buffer, length + 1);
-#GetWindowThreadProcessId(hWnd,&ProcessId);
-#EnumWindows
-
-
+hwnd_note = None
 
 def main():
     print(f"[**] windll.user32 {windll.user32}")
     print(f"[**] windll.psapi {windll.psapi}")
     print(f"[**] windll.kernel32 {windll.kernel32}")
-    
-    #user32.dll  / user32.lib
-    EnumWindows = windll.user32.EnumWindows
-    GetWindowText = windll.user32.GetWindowTextA
-    GetWindowTextLength = windll.user32.GetWindowTextLengthA
-    GetWindowThreadProcessId = windll.user32.GetWindowThreadProcessId
-    IsWindowVisible = windll.user32.IsWindowVisible
-    FindWindowEx = windll.user32.FindWindowExA
-    SendMessage = windll.user32.SendMessageW
-    MessageBox = windll.user32.MessageBoxW
-    #psapi.dll  / psapi.lib
-    GetProcessImageFileName = windll.psapi.GetProcessImageFileNameA
-    #kernel32.dll / Kernel32.Lib
-    OpenProcess = windll.kernel32.OpenProcess
-    CloseHandle = windll.kernel32.CloseHandle
-    GetLastError = windll.kernel32.GetLastError
+ 
+    # looks like  note_h = hwnd_note 
+    note_h = FindNotepad()
+    print(f"[**] Notepad found {hex(note_h)}")
+    nlog(note_h, 'log 1','log 2','log 3')
+    return 0
 
 
-    # int MessageBox(
-    #   HWND    hWnd,
-    #   LPCTSTR lpText,
-    #   LPCTSTR lpCaption,
-    #   UINT    uType
+def nlog(hwnd = None,*argv) -> None :
+    EM_REPLACESEL = 0x00C2
+    edit = HWND()
+
+    # HWND FindWindowExA(
+    #     HWND   hWndParent,
+    #     HWND   hWndChildAfter,
+    #     LPCSTR lpszClass,
+    #     LPCSTR lpszWindow
     # );
 
+    edit_id = c_wchar_p('EDIT')
+    edit = FindWindowEx(hwnd, None, edit_id, None)
+    #print(f'[**] FindWindowEx edit {edit} in notepad hwnd {hex(hwnd)}')
+    for arg in argv:
+        log = '{} {} {}'.format(datetime.now().ctime(),arg,"\r\n")
+        SendMessage(edit, EM_REPLACESEL, True, log)
+    
+
+def FindNotepad():
+    
     # BOOL EnumWindows(
     #     WNDENUMPROC lpEnumFunc,
     #     LPARAM      lParam
     # );
-
        
     #HWND = c_void_p   # classic hwnd = handle
     #HANDLE = c_void_p
@@ -71,9 +70,19 @@ def main():
 
     ENUMFUNC = CFUNCTYPE(c_bool, HWND, LPARAM)
     def EnumWindowsCallback(hwnd, lparam):
+         
          #print(f'[*] hwnd {hwnd} lparam {lparam}')
-         tt = c_wchar_p('Test text')
-         hh = c_wchar_p('Header')
+         global hwnd_note
+
+         hh = c_wchar_p('EnumWindowsCallback')
+         tt = c_wchar_p(f'hwnd {hwnd}')
+         
+        # int MessageBox(
+        #   HWND    hWnd,
+        #   LPCTSTR lpText,
+        #   LPCTSTR lpCaption,
+        #   UINT    uType
+        # );
          #MessageBox(0,tt,hh,0x00000004 + 0x00000040)
 
         # int GetWindowTextA(
@@ -81,8 +90,7 @@ def main():
         #         LPSTR lpString,
         #         int   nMaxCount
         # );
-        #GetWindowText(hwnd, buffer, length + 1);
-
+        
          length = GetWindowTextLength(hwnd) + 1
          #print(f'[**] GetWindowTextLength {length}')
          buffer = create_string_buffer(length) 
@@ -93,8 +101,9 @@ def main():
         #         HWND hWnd
         #  );
          if (IsWindowVisible(hwnd) and length != 0):
-             print(f'[*] hwnd {hwnd} hwnd hex {hex(hwnd)}')
-             print(f'[**] GetWindowText {buffer.value}')
+             #print(f'[*] hwnd {hwnd} hwnd hex {hex(hwnd)}')
+             #print(f'[**] GetWindowText {buffer.value}')
+
              #  DWORD GetWindowThreadProcessId(
              #     HWND    hWnd,
              #     LPDWORD lpdwProcessId
@@ -104,9 +113,8 @@ def main():
              #ProcessID = GetWindowThreadProcessId(hwnd,None)
              GetWindowThreadProcessId(hwnd,byref(ProcessID))
 
-             print(f'[**] GetWindowThreadProcessId {ProcessID.value}')
-             #print(f'[**] ProcessID type {type(ProcessID)}')
-
+             #print(f'[**] GetWindowThreadProcessId {ProcessID.value}')
+             
             # HANDLE OpenProcess(
             #     DWORD dwDesiredAccess,
             #     BOOL  bInheritHandle,
@@ -121,7 +129,7 @@ def main():
                             False, 
                             ProcessID.value)
              if (hProcess != 0):
-                print(f'[**] ok pid {ProcessID.value} opened, hProcess {hProcess}')
+                #print(f'[**] ok pid {ProcessID.value} opened, hProcess {hProcess}')
                 nameProc = create_string_buffer(MAX_PATH) 
                 # DWORD GetProcessImageFileNameA(
                 #         HANDLE hProcess,
@@ -130,26 +138,24 @@ def main():
                 # );
                 
                 if (GetProcessImageFileName(hProcess, nameProc, getsizeof(nameProc)) != 0):
-                    print(f'[**] GetProcessImageFileName {nameProc.value}')
+                    #print(f'[**] GetProcessImageFileName {nameProc.value}')
                     exe = path.split(nameProc.value)[1]
                     if exe == b'notepad.exe':
                         print(f'bingo notepad.exe found {exe}')
+                        hwnd_note = hwnd
                 else:
                     print(f'[**] Error GetProcessImageFileName {hProcess}')
                 CloseHandle(hProcess)
              else:
                 print(f"[**] GetLastError {GetLastError()}")
-                print(f'[**] Error open PID {ProcessID.value}') 
-
+                print(f'[**] Error OpenProcess {buffer.value} PID {ProcessID.value}') 
+        #return from EnumWindowsCallback
          return True
-    
+
     EnumFunc = ENUMFUNC(EnumWindowsCallback)
     EnumWindows(EnumFunc,None)
 
-
-
-    return 0
-
+    return hwnd_note
 
 if __name__ == "__main__":
     main()
@@ -218,10 +224,6 @@ if __name__ == "__main__":
 
 # If this flag is set, the hWnd parameter must be NULL. This is so that the message box can appear on a desktop other than the desktop corresponding to the hWnd.
 # For information on security considerations in regard to using this flag, see Interactive Services. In particular, be aware that this flag can produce interactive content on a locked desktop and should therefore be used for only a very limited set of scenarios, such as resource exhaustion.
-
-
-
-
 
 #http://www.codenet.ru/progr/bcb/Handle-Types.php
 #HWND == HANDLE == c_void_p

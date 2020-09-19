@@ -35,7 +35,7 @@ static void nlog(HWND hNotepad,char *str,...){
 
 HWND npad = NULL;
 
-static BOOL CALLBACK enumWindowCallback(HWND hWnd, LPARAM lparam) {
+ static BOOL CALLBACK enumWindowCallback(HWND hWnd, LPARAM lparam) {
     int length = GetWindowTextLength(hWnd);
     char* buffer = new char[length + 1];
     DWORD ProcessId = 0;
@@ -77,7 +77,11 @@ static BOOL CALLBACK enumWindowCallback(HWND hWnd, LPARAM lparam) {
 }
 
 
-int main(){
+//int main(){
+int main(
+    int argc,
+    TCHAR *argv[],
+    TCHAR *envp[]){
 
     std::cout << "[**] Notepad logger 0.3v" << std::endl;
     //FindNotepad(); Find notepad window by process name
