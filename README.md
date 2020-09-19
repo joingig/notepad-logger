@@ -18,3 +18,5 @@ to find notepad.exe:
 
 
 In [note_logger00.cpp](note_logger00.cpp) i implemented this dirty logger.
+
+In [note_logger00.py](note_logger00.py) clear python implementation notepad logger (temporary with havy comments).
