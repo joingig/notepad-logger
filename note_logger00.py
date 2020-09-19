@@ -33,14 +33,21 @@ def main():
  
     # looks like  note_h = hwnd_note 
     note_h = FindNotepad()
-    print(f"[**] Notepad found {hex(note_h)}")
-    nlog(note_h, 'log 1','log 2','log 3')
+    if not FindNotepad():
+        print("Please run notepad.exe")
+    else:
+        print(f"[**] Notepad found {hex(note_h)}")
+        nlog(note_h, 'log 1','log 2','log 3')
     return 0
 
 
 def nlog(hwnd = None,*argv) -> None :
     EM_REPLACESEL = 0x00C2
     edit = HWND()
+
+    #if hwnd == None:
+    #    print("Please run notepad.exe")
+    #    pass
 
     # HWND FindWindowExA(
     #     HWND   hWndParent,
