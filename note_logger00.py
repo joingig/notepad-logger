@@ -30,13 +30,13 @@ def main():
     print(f"[**] windll.user32 {windll.user32}")
     print(f"[**] windll.psapi {windll.psapi}")
     print(f"[**] windll.kernel32 {windll.kernel32}")
- 
+    
     # looks like  note_h = hwnd_note 
     note_h = FindNotepad()
     if not FindNotepad():
         print("Please run notepad.exe")
     else:
-        print(f"[**] Notepad found {hex(note_h)}")
+        print(f"[**] Notepad window found with HWND {hex(note_h)}")
         nlog(note_h, 'log 1','log 2','log 3')
     return 0
 
@@ -58,7 +58,6 @@ def nlog(hwnd = None,*argv) -> None :
 
     edit_id = c_wchar_p('EDIT')
     edit = FindWindowEx(hwnd, None, edit_id, None)
-    #print(f'[**] FindWindowEx edit {edit} in notepad hwnd {hex(hwnd)}')
     for arg in argv:
         log = '{} {} {}'.format(datetime.now().ctime(),arg,"\r\n")
         SendMessage(edit, EM_REPLACESEL, True, log)
@@ -71,14 +70,9 @@ def FindNotepad():
     #     LPARAM      lParam
     # );
        
-    #HWND = c_void_p   # classic hwnd = handle
-    #HANDLE = c_void_p
-    #LPARAM = POINTER(c_long)
-
     ENUMFUNC = CFUNCTYPE(c_bool, HWND, LPARAM)
     def EnumWindowsCallback(hwnd, lparam):
          
-         #print(f'[*] hwnd {hwnd} lparam {lparam}')
          global hwnd_note
 
          hh = c_wchar_p('EnumWindowsCallback')
@@ -99,29 +93,21 @@ def FindNotepad():
         # );
         
          length = GetWindowTextLength(hwnd) + 1
-         #print(f'[**] GetWindowTextLength {length}')
          buffer = create_string_buffer(length) 
          GetWindowText(hwnd,buffer,length)
-         #print(f'[**] GetWindowText {buffer.value}')
 
         #  BOOL IsWindowVisible(
         #         HWND hWnd
         #  );
          if (IsWindowVisible(hwnd) and length != 0):
-             #print(f'[*] hwnd {hwnd} hwnd hex {hex(hwnd)}')
-             #print(f'[**] GetWindowText {buffer.value}')
 
              #  DWORD GetWindowThreadProcessId(
              #     HWND    hWnd,
              #     LPDWORD lpdwProcessId
              #  );
              ProcessID = DWORD()
-             #print(f'ProcessID2 {type(ProcessID2)} ')
-             #ProcessID = GetWindowThreadProcessId(hwnd,None)
              GetWindowThreadProcessId(hwnd,byref(ProcessID))
-
-             #print(f'[**] GetWindowThreadProcessId {ProcessID.value}')
-             
+                         
             # HANDLE OpenProcess(
             #     DWORD dwDesiredAccess,
             #     BOOL  bInheritHandle,
@@ -136,7 +122,6 @@ def FindNotepad():
                             False, 
                             ProcessID.value)
              if (hProcess != 0):
-                #print(f'[**] ok pid {ProcessID.value} opened, hProcess {hProcess}')
                 nameProc = create_string_buffer(MAX_PATH) 
                 # DWORD GetProcessImageFileNameA(
                 #         HANDLE hProcess,
@@ -145,7 +130,6 @@ def FindNotepad():
                 # );
                 
                 if (GetProcessImageFileName(hProcess, nameProc, getsizeof(nameProc)) != 0):
-                    #print(f'[**] GetProcessImageFileName {nameProc.value}')
                     exe = path.split(nameProc.value)[1]
                     if exe == b'notepad.exe':
                         print(f'bingo notepad.exe found {exe}')
