@@ -1,8 +1,8 @@
-from ctypes import *
-from ctypes.wintypes import *
+from ctypes import windll, CFUNCTYPE, c_bool, c_wchar_p, create_string_buffer, byref
+from ctypes.wintypes import HWND, LPARAM, DWORD, HANDLE, MAX_PATH
 from sys import getsizeof
 from os import path
-from datetime import *
+from datetime import datetime
 
 #msvcrt = cdll.msvcrt
 #str_mess = "Hello from MSVCRT!\n"
@@ -117,10 +117,10 @@ def FindNotepad():
              PROCESS_QUERY_INFORMATION = 0x0400
              PROCESS_VM_READ = 0x0010
              hProcess = HANDLE()
-             hProcess = OpenProcess(PROCESS_QUERY_INFORMATION +
-                            PROCESS_VM_READ,
-                            False, 
-                            ProcessID.value)
+             hProcess = OpenProcess(PROCESS_QUERY_INFORMATION
+                                    + PROCESS_VM_READ,
+                                    False, 
+                                    ProcessID.value)
              if (hProcess != 0):
                 nameProc = create_string_buffer(MAX_PATH) 
                 # DWORD GetProcessImageFileNameA(
