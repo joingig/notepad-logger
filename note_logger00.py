@@ -33,11 +33,12 @@ def main():
     
     # looks like  note_h = hwnd_note 
     note_h = FindNotepad()
-    if not FindNotepad():
-        print("Please run notepad.exe")
-    else:
-        print(f"[**] Notepad window found with HWND {hex(note_h)}")
-        nlog(note_h, 'log 1','log 2','log 3')
+    # if not FindNotepad():
+    #     print("Please run notepad.exe")
+    # else:
+    #     print(f"[**] Notepad window found with HWND {hex(note_h)}")
+    #     nlog(note_h, 'log 1','log 2','log 3')
+    print("Please run notepad.exe") if not FindNotepad() else nlog(note_h, 'log 1','log 2','log 3')
     return 0
 
 
